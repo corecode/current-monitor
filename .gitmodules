@@ -1,3 +1,6 @@
 [submodule "libs"]
-	path = libs
+	path = hardware/libs
 	url = https://github.com/corecode/kicad-libs.git
+[submodule "firmware/mchck-os"]
+	path = firmware/mchck-os
+	url = https://github.com/mchck/mchck-os.git
