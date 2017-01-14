@@ -1,1 +1,7 @@
 *.[do]
+*.bin
+*.elf
+*.ld
+*.linkdep
+*.map
+*.hex
