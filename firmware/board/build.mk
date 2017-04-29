@@ -1,6 +1,6 @@
-SOC+=	kinetis/MKL03Z4
-TARGET=	MKL03Z32VFK4
+SOC+=	kinetis/MKL27Z4
+TARGET=	MKL27Z64VFM4
 
 SRCS-board=	board.c
-SRCS-board.dir= ${PROJECTDIR}/board
+SRCS-board.dir= ${_libdir}/../board
 SRCS.libs+=	board

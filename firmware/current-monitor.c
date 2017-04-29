@@ -5,9 +5,13 @@
 
 enum {
         ADC_SAMPLES = 4096,
-        ADC_SCALE = 1024,
-        ADC2uA = (int)(1.2/4095*1000*1000/0.33*ADC_SCALE),
 };
+
+#define VREF_V 1.19
+#define ADC_COUNTS 65535
+#define SENSE_R 0.33
+#define BASE_GAIN (VREF_V/SENSE_R/ADC_COUNTS)
+#define FIXPOINT_SCALE (1/1e-9)
 
 static volatile uint32_t adc_done;
 static int64_t sample_accum;
@@ -15,12 +19,13 @@ static int sample_count;
 static volatile int32_t sample_avg;
 
 struct adc_calib {
-        uint32_t scale;
-        int32_t offset;
+        float scale;
+        float offset;
+        float thres;
 };
 
-static struct adc_calib calib_fine = { ADC2uA/10000, 283*ADC2uA/10000 };
-static struct adc_calib calib_coarse = { ADC2uA/10, 263*ADC2uA/10 };
+static struct adc_calib calib_fine = { BASE_GAIN/1000, 33e-6, 3.5e-3 };
+static struct adc_calib calib_coarse = { BASE_GAIN/10, 1.818e-3, 3e-3 };
 
 void
 adc_calibration_done(void *cbdata)
@@ -32,15 +37,15 @@ static void
 adc_cb(struct adc_ctx *ctx, uint16_t val, int error, void *cbdata)
 {
         struct adc_calib *calib = cbdata;
-        int32_t scaled = val * calib->scale - calib->offset;
+        float scaled = val * calib->scale - calib->offset;
 
-        if (scaled >= 300*ADC_SCALE) {
+        if (scaled >= calib->thres) {
                 adc_sample_start(&adc0_ctx, ADC_COARSE, adc_cb, &calib_coarse);
         } else {
                 adc_sample_start(&adc0_ctx, ADC_FINE, adc_cb, &calib_fine);
         }
 
-        sample_accum += scaled;
+        sample_accum += scaled * FIXPOINT_SCALE;
         sample_count++;
         if (sample_count == ADC_SAMPLES) {
                 sample_avg = sample_accum / ADC_SAMPLES;
@@ -70,7 +75,7 @@ static chart history;
 static float scale(uint32_t val)
 {
         float fval = val;
-        float alpha = ADC_SCALE * 10;
+        float alpha = FIXPOINT_SCALE * 10;
         return log(fval + sqrt(fval*fval + alpha*alpha));
 }
 
@@ -83,7 +88,7 @@ main(void)
         /* uart_set_stdout(&lpuart0); */
 
         vref_init();
-        lcd5110_init();
+        st7565r_init();
 
         for (volatile int i = 0; i < 5000; i++)
                 __NOP();
@@ -102,19 +107,19 @@ main(void)
 
         display_value(0, 'm');
 
-        float scale_top = scale(300000*ADC_SCALE);
+        float scale_top = scale(0.32*FIXPOINT_SCALE);
         float scale_bottom = scale(0);
         float scale_range = scale_top - scale_bottom;
 
         for (;;) {
                 __WFI();
                 if (adc_done) {
-                        if (sample_avg > 300*ADC_SCALE) {
-                                display_value(sample_avg*10/1000/ADC_SCALE, 'm');
+                        if (sample_avg > 3.5e-3*FIXPOINT_SCALE) {
+                                display_value(sample_avg*10/1000/FIXPOINT_SCALE, 'm');
                         } else if (sample_avg < 0) {
                                 display_value(0, LETTER_MU);
                         } else {
-                                display_value(sample_avg*10/ADC_SCALE, LETTER_MU);
+                                display_value(sample_avg*10/FIXPOINT_SCALE, LETTER_MU);
                         }
                         adc_done = 0;
                         memcpy(&history[0], &history[1], sizeof(history)-sizeof(*history));

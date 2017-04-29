@@ -8,7 +8,7 @@ enum {
 };
 typedef struct range chart[CHART_WIDTH];
 
-void lcd5110_init(void);
+void st7565r_init(void);
 void display_string(int x, int y, const char *str, int dotpos);
 void display_value(uint32_t val, int unit);
 void display_chart(chart c);
