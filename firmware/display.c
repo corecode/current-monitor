@@ -85,34 +85,34 @@ delay(int ms)
 void
 st7565r_init(void)
 {
-        pin_mode(PIN_LCD_nCS, PIN_MODE_MUX_GPIO);
-        gpio_write(PIN_LCD_nCS, 0);
+        /* pin_mode(PIN_LCD_nCS, PIN_MODE_MUX_GPIO); */
+        /* gpio_write(PIN_LCD_nCS, 0); */
         gpio_write(PIN_LCD_nRES, 0);
         delay(500);
         lcd_led(1);
 
-        gpio_write(PIN_LCD_nRES, 1);
-        st7565r_cmd(ST7565R_BIAS(1));
-        st7565r_cmd(ST7565R_ADC(0));
-        st7565r_cmd(ST7565R_COMREVERSE(0));
-        st7565r_cmd(ST7565R_STARTLINE(0));
-        st7565r_cmd(ST7565R_POWER(4));
-        delay(50);
-        st7565r_cmd(ST7565R_POWER(6));
-        delay(50);
-        st7565r_cmd(ST7565R_POWER(7));
-        delay(50);
-        st7565r_cmd(ST7565R_RESISTOR(6));
-        st7565r_cmd(ST7565R_REVERSE(0));
-        st7565r_contrast(0x18);
-        st7565r_cmd(ST7565R_DISPLAY_ON(1));
-        delay(100);
-        st7565r_cmd(ST7565R_ALLON(1));
-        delay(200);
-        st7565r_cmd(ST7565R_ALLON(0));
-        pin_mode(PIN_LCD_nCS, PIN_MODE_MUX_ALT2|PIN_MODE_SLEW_SLOW);
+        /* gpio_write(PIN_LCD_nRES, 1); */
+        /* st7565r_cmd(ST7565R_BIAS(1)); */
+        /* st7565r_cmd(ST7565R_ADC(0)); */
+        /* st7565r_cmd(ST7565R_COMREVERSE(0)); */
+        /* st7565r_cmd(ST7565R_STARTLINE(0)); */
+        /* st7565r_cmd(ST7565R_POWER(4)); */
+        /* delay(50); */
+        /* st7565r_cmd(ST7565R_POWER(6)); */
+        /* delay(50); */
+        /* st7565r_cmd(ST7565R_POWER(7)); */
+        /* delay(50); */
+        /* st7565r_cmd(ST7565R_RESISTOR(6)); */
+        /* st7565r_cmd(ST7565R_REVERSE(0)); */
+        /* st7565r_contrast(0x18); */
+        /* st7565r_cmd(ST7565R_DISPLAY_ON(1)); */
+        /* delay(100); */
+        /* st7565r_cmd(ST7565R_ALLON(1)); */
+        /* delay(200); */
+        /* st7565r_cmd(ST7565R_ALLON(0)); */
+        /* pin_mode(PIN_LCD_nCS, PIN_MODE_MUX_ALT2|PIN_MODE_SLEW_SLOW); */
 
-        for (;;);
+        /* for (;;); */
 
         st7565r_cmd(ST7565R_RESET);
 

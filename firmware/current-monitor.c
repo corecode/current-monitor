@@ -11,7 +11,9 @@ enum {
 #define ADC_COUNTS 65535
 #define SENSE_R 0.33
 #define BASE_GAIN (VREF_V/SENSE_R/ADC_COUNTS)
-#define FIXPOINT_SCALE (1/1e-9)
+#define FIXPOINT_SCALE (1000000000UL)
+#define FIXPOINT_SCALE_U (FIXPOINT_SCALE/1000000)
+#define FIXPOINT_SCALE_M (FIXPOINT_SCALE/1000)
 
 static volatile uint32_t adc_done;
 static int64_t sample_accum;
@@ -100,7 +102,7 @@ main(void)
         ADC0->OFS = 0;
 
         adc_sample_prepare(&adc0_ctx, ADC_MODE_AVG_32);
-        ADC0->SC2 = ADC_SC2_REFSEL(0b01); /* use vref */
+        //ADC0->SC2 = ADC_SC2_REFSEL(0b01); /* use vref */
 
         adc_done = 0;
         adc_sample_start(&adc0_ctx, ADC_FINE, adc_cb, &calib_fine);
@@ -114,12 +116,12 @@ main(void)
         for (;;) {
                 __WFI();
                 if (adc_done) {
-                        if (sample_avg > 3.5e-3*FIXPOINT_SCALE) {
-                                display_value(sample_avg*10/1000/FIXPOINT_SCALE, 'm');
+                        if (sample_avg > 3500*FIXPOINT_SCALE_U) {
+                                display_value((sample_avg*10 + FIXPOINT_SCALE_M-1)/FIXPOINT_SCALE_M, 'm');
                         } else if (sample_avg < 0) {
                                 display_value(0, LETTER_MU);
                         } else {
-                                display_value(sample_avg*10/FIXPOINT_SCALE, LETTER_MU);
+                                display_value((sample_avg*10 + FIXPOINT_SCALE_U-1)/FIXPOINT_SCALE_U, LETTER_MU);
                         }
                         adc_done = 0;
                         memcpy(&history[0], &history[1], sizeof(history)-sizeof(*history));
